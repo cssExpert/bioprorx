@@ -1,14 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Tabs } from 'expo-router';
-import { View, Platform, TouchableOpacity, Animated, Dimensions } from 'react-native';
+import { View, Platform, TouchableOpacity, Animated } from 'react-native';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Colors, Palette } from '@/src/constants/colors';
 import Icon from '@/components/common/Icon';
 
-const { width: SCREEN_W } = Dimensions.get('window');
-const TAB_COUNT = 5;
-const TAB_W = SCREEN_W / TAB_COUNT;
-const DOT_SIZE = 5;
+const DOT_SIZE = 6;
 const ACTIVE = Palette.deepPurple;
 const INACTIVE = '#8F9BB3';
 
@@ -32,25 +29,41 @@ const TAB_ICONS: Record<string, (focused: boolean) => React.ReactNode> = {
 };
 
 function AnimatedTabBar({ state, navigation }: BottomTabBarProps) {
-  // Start the dot centred under tab 0
-  const dotX = useRef(new Animated.Value(TAB_W / 2 - DOT_SIZE / 2)).current;
+  const [barWidth, setBarWidth] = useState(0);
+
+  // 1. Filter out any untracked or auto-generated routes from Expo Router
+  const visibleRoutes = state.routes.filter((route) => TAB_ICONS[route.name]);
+  const totalTabs = visibleRoutes.length || 5;
+
+  // 2. Calculate accurate dynamic widths based on the visible tabs only
+  const tabW = barWidth / totalTabs;
+
+  // Find the true visual index of the active tab within our filtered array
+  const activeRouteName = state.routes[state.index]?.name;
+  const visualIndex = visibleRoutes.findIndex((r) => r.name === activeRouteName);
+
+  const dotX = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.spring(dotX, {
-      toValue: state.index * TAB_W + TAB_W / 2 - DOT_SIZE / 2,
-      useNativeDriver: true,
-      damping: 14,
-      stiffness: 200,
-      mass: 0.7,
-    }).start();
-  }, [dotX, state.index]);
+    if (tabW === 0 || visualIndex === -1) return;
 
-  const BAR_H = Platform.OS === 'ios' ? 82 : 64;
-  const PB = Platform.OS === 'ios' ? 26 : 10;
+    Animated.spring(dotX, {
+      toValue: visualIndex * tabW + tabW / 2 - DOT_SIZE / 2,
+      useNativeDriver: true,
+      damping: 15,
+      stiffness: 180,
+      mass: 0.8,
+    }).start();
+  }, [dotX, visualIndex, tabW]);
+
+  const BAR_H = Platform.OS === 'ios' ? 84 : 66;
+  const PB = Platform.OS === 'ios' ? 24 : 10;
 
   return (
     <View
+      onLayout={(e) => setBarWidth(e.nativeEvent.layout.width)}
       style={{
+        width: '100%',
         height: BAR_H,
         backgroundColor: Colors.white,
         borderTopWidth: 1,
@@ -58,27 +71,38 @@ function AnimatedTabBar({ state, navigation }: BottomTabBarProps) {
         elevation: 8,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 8,
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
         flexDirection: 'row',
-        paddingTop: 10,
         paddingBottom: PB,
       }}
     >
-      {/* Tab buttons */}
-      {state.routes.map((route, index) => {
-        const focused = state.index === index;
+      {/* Dynamic Tab Buttons split across full container layout width */}
+      {visibleRoutes.map((route, index) => {
+        const focused = visualIndex === index;
         const renderIcon = TAB_ICONS[route.name];
 
         return (
           <TouchableOpacity
             key={route.key}
-            onPress={() => navigation.navigate(route.name)}
+            onPress={() => {
+              const event = navigation.emit({
+                type: 'tabPress',
+                target: route.key,
+                canPreventDefault: true,
+              });
+
+              if (!focused && !event.defaultPrevented) {
+                navigation.navigate(route.name);
+              }
+            }}
             activeOpacity={0.75}
             style={{
-              flex: 1,
+              width: tabW > 0 ? tabW : `${100 / totalTabs}%`,
               alignItems: 'center',
               justifyContent: 'center',
+              height: '100%',
+              paddingTop: 8,
             }}
           >
             {renderIcon?.(focused)}
@@ -86,20 +110,22 @@ function AnimatedTabBar({ state, navigation }: BottomTabBarProps) {
         );
       })}
 
-      {/* Sliding active dot — sits at the bottom of the icon area */}
-      <Animated.View
-        pointerEvents="none"
-        style={{
-          position: 'absolute',
-          bottom: PB,
-          left: 0,
-          width: DOT_SIZE,
-          height: DOT_SIZE,
-          borderRadius: DOT_SIZE / 2,
-          backgroundColor: ACTIVE,
-          transform: [{ translateX: dotX }],
-        }}
-      />
+      {/* Sliding active indicator dot */}
+      {tabW > 0 && visualIndex !== -1 && (
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            bottom: PB,
+            left: 0,
+            width: DOT_SIZE,
+            height: DOT_SIZE,
+            borderRadius: DOT_SIZE / 2,
+            backgroundColor: ACTIVE,
+            transform: [{ translateX: dotX }],
+          }}
+        />
+      )}
     </View>
   );
 }
