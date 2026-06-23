@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import Icon from '@/components/common/Icon';
 import { Font } from '@/src/constants/typography';
 import { Colors } from '@/src/constants/colors';
 import { Radius, Height, FontSize } from '@/src/constants/mixins';
+
+const SCREEN_H = Dimensions.get('window').height;
 
 export type DropdownOption = {
   label: string;
@@ -31,12 +33,22 @@ export default function Dropdown({
 }: DropdownProps) {
   const [open, setOpen] = useState(false);
   const [triggerHeight, setTriggerHeight] = useState(0);
+  const [openAbove, setOpenAbove] = useState(false);
+  const containerRef = useRef<View>(null);
   const selected = options.find((o) => o.value === value);
   const dropdownHeight = Math.min(options.length * 48, 220);
 
+  const handleOpen = () => {
+    containerRef.current?.measure((_x, _y, _w, _h, _pageX, pageY) => {
+      const spaceBelow = SCREEN_H - pageY - triggerHeight;
+      setOpenAbove(spaceBelow < dropdownHeight);
+      setOpen(true);
+    });
+  };
+
   return (
-    <View style={{ marginTop, zIndex: open ? 1000 : 1 }}>
-      {/* Trigger area — measured so dropdown knows where to position */}
+    <View ref={containerRef} collapsable={false} style={{ marginTop, zIndex: open ? 1000 : 1 }}>
+      {/* Trigger area */}
       <View onLayout={(e) => setTriggerHeight(e.nativeEvent.layout.height)}>
         {label && (
           <Text
@@ -51,13 +63,13 @@ export default function Dropdown({
           </Text>
         )}
         <TouchableOpacity
-          onPress={() => setOpen((o) => !o)}
+          onPress={open ? () => setOpen(false) : handleOpen}
           activeOpacity={0.8}
           style={{
             height: Height.lg,
             backgroundColor: Colors.fieldBg,
             borderWidth: 1,
-            borderColor: error ? Colors.error : open ? Colors.focusBorder : Colors.fieldBorder,
+            borderColor: error ? Colors.error : open ? Colors.link : Colors.fieldBorder,
             borderRadius: Radius.md,
             paddingHorizontal: 14,
             flexDirection: 'row',
@@ -84,20 +96,25 @@ export default function Dropdown({
       </View>
 
       {error && (
-        <Text style={{ fontSize: FontSize.sm, fontFamily: Font.body, color: Colors.error, marginTop: 4 }}>
+        <Text
+          style={{
+            fontSize: FontSize.sm,
+            fontFamily: Font.body,
+            color: Colors.error,
+            marginTop: 4,
+          }}
+        >
           {error}
         </Text>
       )}
 
-      {/* Inline dropdown list — absolutely positioned below trigger */}
       {open && (
         <View
           style={{
             position: 'absolute',
-            top: triggerHeight + 4,
+            ...(openAbove ? { top: -(dropdownHeight + 4) } : { top: triggerHeight + 4 }),
             left: 0,
             right: 0,
-            minWidth: 100,
             backgroundColor: Colors.white,
             borderRadius: Radius.md,
             borderWidth: 1,
@@ -114,7 +131,7 @@ export default function Dropdown({
           }}
         >
           <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
-            {options.map((option, i) => {
+            {options.map((option) => {
               const isSelected = option.value === value;
               return (
                 <TouchableOpacity
@@ -124,7 +141,7 @@ export default function Dropdown({
                     setOpen(false);
                   }}
                   style={{
-                    height: Height.sm,
+                    height: Height.md,
                     paddingHorizontal: 14,
                     flexDirection: 'row',
                     alignItems: 'center',

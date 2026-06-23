@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TextInputProps,
-  TouchableOpacity,
-  ViewStyle,
-} from 'react-native';
-import { Colors } from '../../constants/colors';
+import { View, Text, TextInput, TextInputProps, TouchableOpacity, ViewStyle } from 'react-native';
+import { Colors } from '@/src/constants/colors';
+import { FontSize, Height, Radius } from '@/src/constants/mixins';
+import { Font } from '@/src/constants/typography';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -33,22 +28,18 @@ export const Input: React.FC<InputProps> = ({
   const [secure, setSecure] = useState(secureTextEntry ?? false);
   const [focused, setFocused] = useState(false);
 
-  const borderColor = error
-    ? Colors.error
-    : focused
-    ? Colors.primary
-    : Colors.border;
+  const borderColor = error ? Colors.error : focused ? Colors.link : Colors.border;
 
   return (
     <View style={[{ marginBottom: 16 }, containerStyle]}>
       {label && (
         <Text
           style={{
-            fontSize: 13,
-            fontWeight: '600',
-            color: Colors.textSecondary,
-            marginBottom: 6,
-            letterSpacing: 0.3,
+            fontSize: FontSize.sm,
+            fontFamily: Font.bodySemiBold,
+            color: Colors.textPrimary,
+            marginBottom: 4,
+            letterSpacing: 0.1,
           }}
         >
           {label}
@@ -62,9 +53,9 @@ export const Input: React.FC<InputProps> = ({
           backgroundColor: Colors.white,
           borderWidth: 1.5,
           borderColor,
-          borderRadius: 12,
-          paddingHorizontal: 14,
-          minHeight: 50,
+          borderRadius: Radius.md,
+          paddingHorizontal: FontSize.xsPlus,
+          minHeight: Height.lg,
         }}
       >
         {leftIcon && <View style={{ marginRight: 10 }}>{leftIcon}</View>}
@@ -81,15 +72,15 @@ export const Input: React.FC<InputProps> = ({
           }}
           style={{
             flex: 1,
-            fontSize: 15,
-            color: Colors.textPrimary,
+            fontSize: FontSize.base,
+            color: Colors.link,
             paddingVertical: 12,
           }}
           placeholderTextColor={Colors.muted}
         />
         {secureToggle && (
           <TouchableOpacity onPress={() => setSecure(!secure)} style={{ padding: 4 }}>
-            <Text style={{ fontSize: 13, color: Colors.primary, fontWeight: '600' }}>
+            <Text style={{ fontSize: FontSize.base, color: Colors.primary, fontWeight: '600' }}>
               {secure ? 'Show' : 'Hide'}
             </Text>
           </TouchableOpacity>
@@ -98,7 +89,9 @@ export const Input: React.FC<InputProps> = ({
       </View>
 
       {error && (
-        <Text style={{ fontSize: 12, color: Colors.error, marginTop: 4 }}>{error}</Text>
+        <Text style={{ fontSize: FontSize.xsPlus, color: Colors.error, marginTop: 4 }}>
+          {error}
+        </Text>
       )}
       {hint && !error && (
         <Text style={{ fontSize: 12, color: Colors.muted, marginTop: 4 }}>{hint}</Text>

@@ -62,6 +62,7 @@ export const Colors = {
   infoBoxText: '#1e3a5f',
   link: '#A583FF',
   infoBoxBgrgb: '47,148,237',
+  darkBlue: '#142A93',
 
   // Kept for existing screens
   teal: '#14B8A6',

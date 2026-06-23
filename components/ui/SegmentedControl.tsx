@@ -38,8 +38,8 @@ export default function SegmentedControl({ tabs, selectedIndex, onChange }: Prop
       onLayout={handleLayout}
       style={{
         flexDirection: 'row',
-        backgroundColor: Colors.surface,
-        borderRadius: Radius.full,
+        backgroundColor: Colors.white,
+        borderRadius: Radius.md,
         padding: PADDING,
         borderWidth: 1,
         borderColor: Colors.border,
@@ -55,8 +55,8 @@ export default function SegmentedControl({ tabs, selectedIndex, onChange }: Prop
             left: PADDING,
             width: tabWidth,
             bottom: PADDING,
-            backgroundColor: Colors.primaryLight,
-            borderRadius: Radius.full,
+            backgroundColor: Colors.link,
+            borderRadius: Radius.md,
             transform: [{ translateX: slideAnim }],
           }}
         />
@@ -76,8 +76,8 @@ export default function SegmentedControl({ tabs, selectedIndex, onChange }: Prop
           <Text
             style={{
               fontSize: FontSize.md,
-              fontFamily: selectedIndex === index ? Font.bodySemiBold : Font.body,
-              color: selectedIndex === index ? Colors.white : Colors.textSecondary,
+              fontFamily: selectedIndex === index ? Font.bodyBold : Font.bodyBold,
+              color: selectedIndex === index ? Colors.white : Colors.textPrimary,
             }}
           >
             {tab}

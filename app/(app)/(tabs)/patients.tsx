@@ -17,12 +17,15 @@ import SegmentedControl from '@/components/ui/SegmentedControl';
 import SpecialtyDropdown from '@/components/ui/SpecialtyDropdown';
 import ScanCardItem from '@/components/ui/ScanCardItem';
 import Select from '@/components/ui/Select';
+import Dropdown from '@/components/ui/Dropdown';
 import { Input } from '@/src/components/ui/Input';
+import Icon from '@/components/common/Icon';
 import { Colors } from '@/src/constants/colors';
 import { Font } from '@/src/constants/typography';
 import { FontSize, Radius, Shadow } from '@/src/constants/mixins';
 import { SPECIALTIES } from '@/src/constants/specialties';
 import { useAuthStore } from '@/src/stores/authStore';
+import Checkbox from '@/components/ui/Checkbox';
 
 const TABS = ['New Patients', 'Existing patients'];
 
@@ -35,8 +38,15 @@ const GENDER_OPTIONS = [
 const PLAN_OPTIONS = [
   { label: 'PPO', value: 'ppo' },
   { label: 'HMO', value: 'hmo' },
+  { label: 'POS / HMO-POS', value: 'pos_hmo_pos' },
   { label: 'EPO', value: 'epo' },
-  { label: 'POS', value: 'pos' },
+  { label: 'Medicare Part B', value: 'medicare_part_b' },
+  { label: 'Medicare Advantage', value: 'medicare_advantage' },
+  { label: 'Medicaid FFS', value: 'medicaid_ffs' },
+  { label: 'Medicaid MCO', value: 'medicaid_mco' },
+  { label: 'TRICARE Select', value: 'tricare_select' },
+  { label: 'TRICARE Prime', value: 'tricare_prime' },
+  { label: 'VA / VAMC', value: 'va_vamc' },
 ];
 
 const PLAN_TYPE_OPTIONS = [
@@ -64,7 +74,16 @@ const HEIGHT_UNIT_OPTIONS = [
 
 function BellIcon() {
   return (
-    <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={Colors.textPrimary} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+    <Svg
+      width={22}
+      height={22}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={Colors.textPrimary}
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <Path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" />
     </Svg>
   );
@@ -100,7 +119,9 @@ interface PatientForm {
 function resolveSpecialtyId(specialty?: string[]): string {
   if (!specialty?.length) return 'rheumatology';
   const name = specialty[0].toLowerCase();
-  const match = SPECIALTIES.find((s) => s.name.toLowerCase().includes(name) || name.includes(s.short));
+  const match = SPECIALTIES.find(
+    (s) => s.name.toLowerCase().includes(name) || name.includes(s.short),
+  );
   return match?.id ?? 'rheumatology';
 }
 
@@ -177,7 +198,7 @@ export default function PatientsScreen() {
   return (
     <View style={{ flex: 1 }}>
       <ScreenShades />
-      <SafeAreaView style={{ flex: 1, backgroundColor: Colors.white }} edges={['top']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: Colors.surface }} edges={['top']}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -187,24 +208,49 @@ export default function PatientsScreen() {
           <View
             style={{
               paddingHorizontal: 20,
-              paddingTop: 6,
-              paddingBottom: 16,
-              backgroundColor: Colors.white,
-              borderBottomWidth: 1,
-              borderBottomColor: Colors.border,
+              paddingBlockStart: 6,
+              paddingBlockEnd: 16,
+              backgroundColor: Colors.surface,
             }}
           >
             {/* Greeting row */}
-            <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                justifyContent: 'space-between',
+                marginBottom: 14,
+              }}
+            >
               <View>
-                <Text style={{ fontFamily: Font.body, fontSize: FontSize.base, color: Colors.textMuted }}>
+                <Text
+                  style={{
+                    fontFamily: Font.body,
+                    fontSize: FontSize.base,
+                    color: Colors.textMuted,
+                  }}
+                >
                   {greeting}
                 </Text>
-                <Text style={{ fontFamily: Font.bodyExtraBold, fontSize: FontSize.h4, color: Colors.textPrimary, marginTop: 1 }}>
-                  Dr. {user?.lastName ?? 'Provider'} !
+                <Text
+                  style={{
+                    fontFamily: Font.headingBlack,
+                    fontSize: FontSize.h4,
+                    color: Colors.textPrimary,
+                    marginTop: 1,
+                  }}
+                >
+                  Dr. {user?.firstName ?? 'Sari'} !
                 </Text>
-                <Text style={{ fontFamily: Font.body, fontSize: FontSize.sm, color: Colors.textMuted, marginTop: 2 }}>
-                  {user?.specialty?.[0] ?? 'Rheumatology'}
+                <Text
+                  style={{
+                    fontFamily: Font.body,
+                    fontSize: FontSize.sm,
+                    color: Colors.textMuted,
+                    marginTop: 2,
+                  }}
+                >
+                  {'CA'}
                 </Text>
               </View>
               <TouchableOpacity
@@ -224,38 +270,45 @@ export default function PatientsScreen() {
             </View>
 
             {/* Change Specialty row */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <Text style={{ fontFamily: Font.bodyMedium, fontSize: FontSize.sm, color: Colors.textMuted }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: 16,
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: Font.bodyMedium,
+                  fontSize: FontSize.sm,
+                  color: Colors.textMuted,
+                }}
+              >
                 Change Specialty
               </Text>
               <SpecialtyDropdown selectedId={specialtyId} onSelect={setSpecialtyId} />
             </View>
 
             {/* Segmented control */}
-            <SegmentedControl
-              tabs={TABS}
-              selectedIndex={activeTab}
-              onChange={switchTab}
-            />
+            <SegmentedControl tabs={TABS} selectedIndex={activeTab} onChange={switchTab} />
           </View>
 
           {/* ─── Scrollable form ─── */}
           <ScrollView
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100 }}
             keyboardShouldPersistTaps="handled"
           >
-            <Animated.View
-              style={{ opacity: tabFade, transform: [{ translateX: tabSlide }] }}
-            >
+            <Animated.View style={{ opacity: tabFade, transform: [{ translateX: tabSlide }] }}>
               {/* SCAN CARD section */}
-              <View style={{ marginBottom: 20 }}>
+              <View style={{ marginBottom: 0 }}>
                 <Text
                   style={{
-                    fontFamily: Font.bodyBold,
-                    fontSize: FontSize.xs,
+                    fontFamily: Font.bodyMedium,
+                    fontSize: FontSize.base,
                     color: Colors.textMuted,
-                    letterSpacing: 1.2,
+                    letterSpacing: 0.5,
                     textTransform: 'uppercase',
                     marginBottom: 12,
                   }}
@@ -268,16 +321,14 @@ export default function PatientsScreen() {
                   style={{
                     flexDirection: 'row',
                     alignItems: 'flex-start',
-                    backgroundColor: Colors.infoBoxBg,
-                    borderWidth: 1,
-                    borderColor: Colors.infoBoxBorder,
+                    backgroundColor: `${Colors.darkBlue}1a`,
                     borderRadius: Radius.sm,
                     padding: 12,
                     gap: 10,
                     marginBottom: 14,
                   }}
                 >
-                  <Text style={{ fontSize: FontSize.base }}>ℹ️</Text>
+                  <Icon name="PatientIcon2" size="16" viewBox="0 0 24 24" color={Colors.darkBlue} />
                   <Text
                     style={{
                       flex: 1,
@@ -287,7 +338,8 @@ export default function PatientsScreen() {
                       lineHeight: 18,
                     }}
                   >
-                    Patient details have been auto-filled from the insurance card and license. Please review and update as needed.
+                    Patient details have been auto-filled from the insurance card and license.
+                    Please review and update as needed.
                   </Text>
                 </View>
 
@@ -296,29 +348,80 @@ export default function PatientsScreen() {
                   description="Use camera to scan front and back of card. Fields auto-fill instantly."
                   onPress={() => router.push('/(app)/pa/card-scan')}
                 />
+
                 <ScanCardItem
                   title="Scan Driver License"
                   description="Use camera to scan front and back of card. Fields auto-fill instantly."
                   onPress={() => router.push('/(app)/pa/card-scan')}
                 />
+              </View>
 
-                <View style={{ alignItems: 'center', marginVertical: 4, marginBottom: 16 }}>
-                  <Text style={{ fontFamily: Font.body, fontSize: FontSize.base, color: Colors.textMuted }}>
-                    Or
-                  </Text>
-                </View>
+              <View
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}
+              >
+                <View style={{ flex: 1, height: 1, backgroundColor: Colors.divider }} />
+                <Text
+                  style={{
+                    fontSize: FontSize.base,
+                    fontFamily: Font.body,
+                    color: Colors.textMuted,
+                  }}
+                >
+                  Or
+                </Text>
+                <View style={{ flex: 1, height: 1, backgroundColor: Colors.divider }} />
               </View>
 
               {/* Patient Information */}
               <View>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                  <Text style={{ fontFamily: Font.bodyBold, fontSize: FontSize.lgPlus, color: Colors.textPrimary }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 16,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontFamily: Font.heading,
+                      fontSize: FontSize.xl,
+                      color: Colors.textPrimary,
+                    }}
+                  >
                     Patient Information
                   </Text>
-                  <TouchableOpacity onPress={() => setIsEditing((v) => !v)}>
-                    <Text style={{ fontFamily: Font.bodySemiBold, fontSize: FontSize.base, color: Colors.brandAccent }}>
-                      {isEditing ? 'Done' : 'Edit'}
-                    </Text>
+                  <TouchableOpacity
+                    onPress={() => setIsEditing((v) => !v)}
+                    style={{
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 2,
+                      }}
+                    >
+                      <Icon
+                        name="EditIcon"
+                        size="16"
+                        viewBox="0 0 24 24"
+                        color={Colors.infoBoxBorderDark}
+                      />
+                      <Text
+                        style={{
+                          fontFamily: Font.bodySemiBold,
+                          fontSize: FontSize.sm,
+                          color: Colors.infoBoxBorderDark,
+                        }}
+                      >
+                        {isEditing ? 'Done' : 'Edit'}
+                      </Text>
+                    </View>
                   </TouchableOpacity>
                 </View>
 
@@ -330,7 +433,12 @@ export default function PatientsScreen() {
                     value={form.chartId}
                     onChangeText={(v) => setField('chartId', v)}
                     rightIcon={
-                      <Text style={{ fontSize: FontSize.lg }}>🔍</Text>
+                      <Icon
+                        name="SearchIcon"
+                        size="16"
+                        viewBox="0 0 24 24"
+                        color={Colors.textPrimary}
+                      />
                     }
                     autoCapitalize="characters"
                   />
@@ -387,7 +495,7 @@ export default function PatientsScreen() {
                 />
 
                 {/* BIN + PCN */}
-                <View style={{ flexDirection: 'row', gap: 12 }}>
+                <View style={{ flexDirection: 'row', gap: 10 }}>
                   <View style={{ flex: 1 }}>
                     <Input
                       label="Bin"
@@ -426,8 +534,8 @@ export default function PatientsScreen() {
                 />
 
                 {/* City + State */}
-                <View style={{ flexDirection: 'row', gap: 12 }}>
-                  <View style={{ flex: 2 }}>
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <View style={{ flex: 1 }}>
                     <Input
                       label="City"
                       placeholder="City"
@@ -477,7 +585,7 @@ export default function PatientsScreen() {
                 <View style={{ marginBottom: 16 }} />
 
                 {/* Phone Type + Phone Number */}
-                <View style={{ flexDirection: 'row', gap: 12 }}>
+                <View style={{ flexDirection: 'row', gap: 10 }}>
                   <View style={{ flex: 1 }}>
                     <Select
                       label="Phone Type"
@@ -508,8 +616,8 @@ export default function PatientsScreen() {
                 />
 
                 {/* Weight */}
-                <View style={{ flexDirection: 'row', gap: 12 }}>
-                  <View style={{ flex: 2 }}>
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <View style={{ flex: 3 }}>
                     <Input
                       label="Patient Weight"
                       placeholder="Enter weight"
@@ -520,7 +628,8 @@ export default function PatientsScreen() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Select
-                      label=" "
+                      label="LBS"
+                      hideLabel
                       value={form.weightUnit}
                       onChange={(v) => setField('weightUnit', v)}
                       options={WEIGHT_UNIT_OPTIONS}
@@ -529,8 +638,8 @@ export default function PatientsScreen() {
                 </View>
 
                 {/* Height */}
-                <View style={{ flexDirection: 'row', gap: 12 }}>
-                  <View style={{ flex: 2 }}>
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <View style={{ flex: 3 }}>
                     <Input
                       label="Patient Height"
                       placeholder="Enter height"
@@ -541,7 +650,8 @@ export default function PatientsScreen() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Select
-                      label=" "
+                      label="CM"
+                      hideLabel
                       value={form.heightUnit}
                       onChange={(v) => setField('heightUnit', v)}
                       options={HEIGHT_UNIT_OPTIONS}
@@ -550,14 +660,26 @@ export default function PatientsScreen() {
                 </View>
 
                 {/* Select Plan */}
-                <Select
+                <Dropdown
                   label="Select Plan"
                   value={form.plan}
                   onChange={(v) => setField('plan', v)}
                   options={PLAN_OPTIONS}
                   placeholder="PPO"
                 />
-                <View style={{ marginBottom: 16 }} />
+                <View style={{ marginBottom: 6 }} />
+
+                {/* Use if card scan fails note */}
+                <Text
+                  style={{
+                    fontFamily: Font.body,
+                    fontSize: FontSize.xs,
+                    color: Colors.textMuted,
+                    marginBottom: 14,
+                  }}
+                >
+                  Use if card scan fails or plan not in BIN table.
+                </Text>
 
                 {/* Select Plan Type */}
                 <Select
@@ -569,54 +691,13 @@ export default function PatientsScreen() {
                 />
                 <View style={{ marginBottom: 16 }} />
 
-                {/* Use if card scan fails note */}
-                <Text
-                  style={{
-                    fontFamily: Font.body,
-                    fontSize: FontSize.xs2,
-                    color: Colors.textMuted,
-                    marginBottom: 10,
-                  }}
-                >
-                  Use if card scan fails or plan not in BIN table.
-                </Text>
-
                 {/* Confirm plan checkbox */}
-                <TouchableOpacity
-                  onPress={() => setField('confirmPlan', !form.confirmPlan)}
-                  activeOpacity={0.7}
-                  style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}
-                >
-                  <View
-                    style={{
-                      width: 20,
-                      height: 20,
-                      borderRadius: Radius.xxs,
-                      borderWidth: 2,
-                      borderColor: form.confirmPlan ? Colors.brandAccent : Colors.border,
-                      backgroundColor: form.confirmPlan ? Colors.brandAccent : Colors.white,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginTop: 1,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {form.confirmPlan && (
-                      <Text style={{ color: Colors.white, fontSize: 12, lineHeight: 14 }}>✓</Text>
-                    )}
-                  </View>
-                  <Text
-                    style={{
-                      flex: 1,
-                      fontFamily: Font.body,
-                      fontSize: FontSize.sm,
-                      color: Colors.textSecondary,
-                      lineHeight: 20,
-                    }}
-                  >
-                    Please confirm this is patient&apos;s current plan
-                  </Text>
-                </TouchableOpacity>
+                <Checkbox
+                  checked={form.confirmPlan}
+                  onChange={(v) => setField('confirmPlan', v)}
+                  label="Please confirm this is patient's current plan"
+                  marginTop={4}
+                />
               </View>
             </Animated.View>
           </ScrollView>
@@ -636,7 +717,7 @@ export default function PatientsScreen() {
               activeOpacity={0.88}
               style={{
                 backgroundColor: Colors.primary,
-                borderRadius: Radius.lg,
+                borderRadius: Radius.md,
                 paddingVertical: 17,
                 alignItems: 'center',
                 ...Shadow.md,

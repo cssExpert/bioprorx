@@ -1,17 +1,8 @@
 import React, { useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  Image,
-  ScrollView,
-  Dimensions,
-} from 'react-native';
+import { View, TouchableOpacity, Modal, Image, ScrollView, Dimensions } from 'react-native';
 import { SPECIALTIES } from '@/src/constants/specialties';
 import { Colors } from '@/src/constants/colors';
-import { Font } from '@/src/constants/typography';
-import { FontSize, Radius, Shadow } from '@/src/constants/mixins';
+import { Radius, Shadow } from '@/src/constants/mixins';
 import Icon from '@/components/common/Icon';
 
 const SCREEN_W = Dimensions.get('window').width;
@@ -58,26 +49,26 @@ export default function SpecialtyDropdown({ selectedId, onSelect }: Props) {
           style={{
             flexDirection: 'row',
             alignItems: 'center',
+            justifyContent: 'space-between',
             backgroundColor: Colors.white,
             borderWidth: 1,
             borderColor: Colors.border,
-            borderRadius: Radius.lg,
+            borderRadius: Radius.md,
             paddingHorizontal: 12,
             paddingVertical: 8,
+            minWidth: 180,
             gap: 8,
             ...Shadow.sm,
           }}
         >
-          <Image
-            source={selected.graphic}
-            style={{ width: 22, height: 22 }}
-            resizeMode="contain"
-          />
-          <Image
-            source={selected.logo}
-            style={{ width: 84, height: 24 }}
-            resizeMode="contain"
-          />
+          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+            <Image
+              source={selected.graphic}
+              style={{ width: 24, height: 24 }}
+              resizeMode="contain"
+            />
+            <Image source={selected.logo} style={{ width: 100, height: 24 }} resizeMode="contain" />
+          </View>
           <Icon
             name={open ? 'ChevronUpIcon' : 'ChevronDownIcon'}
             size="16"
@@ -87,29 +78,20 @@ export default function SpecialtyDropdown({ selectedId, onSelect }: Props) {
         </TouchableOpacity>
       </View>
 
-      <Modal
-        visible={open}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setOpen(false)}
-      >
-        <TouchableOpacity
-          style={{ flex: 1 }}
-          onPress={() => setOpen(false)}
-          activeOpacity={1}
-        >
+      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+        <TouchableOpacity style={{ flex: 1 }} onPress={() => setOpen(false)} activeOpacity={1}>
           {layout && (
             <View
               style={{
                 position: 'absolute',
-                top: layout.y + layout.height + 6,
+                top: layout.y + layout.height + 4,
                 right: dropdownRight < 0 ? 16 : dropdownRight,
                 backgroundColor: Colors.white,
-                borderRadius: Radius.lg,
+                borderRadius: Radius.md,
                 borderWidth: 1,
                 borderColor: Colors.border,
-                minWidth: 220,
-                maxHeight: 380,
+                minWidth: 180,
+                maxHeight: 410,
                 overflow: 'hidden',
                 ...Shadow.lg,
               }}
@@ -129,18 +111,16 @@ export default function SpecialtyDropdown({ selectedId, onSelect }: Props) {
                         paddingVertical: 10,
                         gap: 10,
                         backgroundColor: isSelected ? Colors.selectedBg : Colors.white,
-                        borderBottomWidth: index < SPECIALTIES.length - 1 ? 1 : 0,
-                        borderBottomColor: Colors.divider,
                       }}
                     >
                       <Image
                         source={sp.graphic}
-                        style={{ width: 32, height: 32 }}
+                        style={{ width: 24, height: 24 }}
                         resizeMode="contain"
                       />
                       <Image
                         source={sp.logo}
-                        style={{ width: 100, height: 26 }}
+                        style={{ width: 100, height: 24 }}
                         resizeMode="contain"
                       />
                     </TouchableOpacity>

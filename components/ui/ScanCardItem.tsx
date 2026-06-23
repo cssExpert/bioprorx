@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import Icon from '@/components/common/Icon';
 import { Colors } from '@/src/constants/colors';
 import { Font } from '@/src/constants/typography';
-import { FontSize, Radius, Shadow } from '@/src/constants/mixins';
+import { FontSize, Radius } from '@/src/constants/mixins';
 
 interface Props {
   title: string;
@@ -16,32 +16,30 @@ export default function ScanCardItem({ title, description, onPress }: Props) {
     <View
       style={{
         backgroundColor: Colors.white,
-        borderRadius: Radius.lg,
+        borderRadius: Radius.md,
         borderWidth: 1.5,
+        borderStyle: 'dashed',
         borderColor: Colors.border,
         padding: 20,
         alignItems: 'center',
         marginBottom: 12,
-        ...Shadow.sm,
       }}
     >
       <View
         style={{
-          width: 52,
-          height: 52,
-          borderRadius: Radius.md,
-          backgroundColor: Colors.surface,
+          width: 32,
+          height: 32,
           alignItems: 'center',
           justifyContent: 'center',
           marginBottom: 10,
         }}
       >
-        <Icon name="CameraIcon" size="28" viewBox="0 0 24 24" color={Colors.textSecondary} />
+        <Icon name="CameraIcon" size="32" viewBox="0 0 24 24" color={Colors.textPrimary} />
       </View>
       <Text
         style={{
           fontFamily: Font.bodySemiBold,
-          fontSize: FontSize.lg,
+          fontSize: FontSize.xl,
           color: Colors.textPrimary,
           marginBottom: 6,
           textAlign: 'center',
@@ -52,7 +50,7 @@ export default function ScanCardItem({ title, description, onPress }: Props) {
       <Text
         style={{
           fontFamily: Font.body,
-          fontSize: FontSize.sm,
+          fontSize: FontSize.base,
           color: Colors.textMuted,
           textAlign: 'center',
           lineHeight: 18,
@@ -64,9 +62,9 @@ export default function ScanCardItem({ title, description, onPress }: Props) {
       <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
         <Text
           style={{
-            fontFamily: Font.bodySemiBold,
+            fontFamily: Font.bodyBold,
             fontSize: FontSize.base,
-            color: Colors.brandAccent,
+            color: Colors.primary,
           }}
         >
           Open Camera
